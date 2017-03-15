@@ -26,6 +26,10 @@
 
 let g:fullscreen_python_win32ext_available = 0
 
+" http://vim.wikia.com/wiki/Restore_screen_size_and_position
+" " To enable the saving and restoring of screen positions.
+let g:fullscreen_orig_screen_size_restore_pos = g:screen_size_restore_pos
+
 function! s:check_win32_extensions()
   if has('python3')
     silent! python3 import vimfullscreen
@@ -44,13 +48,16 @@ if has('fullscreen')
   function fullscreen#toggle()
     if &fullscreen
       set nofullscreen
+      let g:screen_size_restore_pos = g:fullscreen_orig_screen_size_restore_pos
     else
       set fullscreen
+      let g:screen_size_restore_pos = 0 " do NOT store full screen as default screen size
     endif
   endfunction
 
   function fullscreen#maximize()
     call fullscreen#default#maximize()
+    let g:screen_size_restore_pos = 0 " do NOT store full screen as default screen size
   endfunction
 
 elseif has('gui_win32') && (has('python3') || has('python')) && s:check_win32_extensions()
@@ -58,19 +65,23 @@ elseif has('gui_win32') && (has('python3') || has('python')) && s:check_win32_ex
   function fullscreen#toggle()
     if fullscreen#windows#is_active()
       call fullscreen#windows#deactivate()
+      let g:screen_size_restore_pos = g:fullscreen_orig_screen_size_restore_pos
     else
       call fullscreen#windows#activate()
+      let g:screen_size_restore_pos = 0 " do NOT store full screen as default screen size
     endif
   endfunction
 
   " Simulate maximize
   function fullscreen#maximize()
     call fullscreen#windows#maximize()
+    let g:screen_size_restore_pos = 0 " do NOT store full screen as default screen size
   endfunction
 
   function fullscreen#exit()
     if fullscreen#windows#is_active()
       call fullscreen#windows#deactivate()
+      let g:screen_size_restore_pos = g:fullscreen_orig_screen_size_restore_pos
     endif
   endfunction
 
